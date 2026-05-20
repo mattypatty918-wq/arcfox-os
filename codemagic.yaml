@@ -9,7 +9,6 @@ workflows:
       xcode: "15.0"
       node: "18.0"
       vars:
-        XCODE_WORKSPACE: ""
         XCODE_SCHEME: "ArcFoxOS"
     triggering:
       events:
@@ -21,14 +20,13 @@ workflows:
         script: |
           cd $FCI_BUILD_DIR
           if [ -f project.yml ]; then
-            # Codemagic has xcodegen pre-installed
             xcodegen generate
           fi
           ls -la
       - name: Build iOS
         script: |
           cd $FCI_BUILD_DIR
-          xcodebuild -project ArcFoxOS.xcodeproj -scheme ArcFoxOS -configuration Debug build CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" DEVELOPMENT_TEAM="" 2>&1 | tail -30
+          xcodebuild -project ArcFoxOS.xcodeproj -scheme $XCODE_SCHEME -configuration Debug build CODE_SIGNING_ALLOWED=NO 2>&1 | tail -30
     artifacts:
       - $FCI_BUILD_DIR/**/*.xcarchive
       - build/ios/ipa/*.ipa
