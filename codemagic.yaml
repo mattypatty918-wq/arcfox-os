@@ -3,40 +3,32 @@
 
 workflows:
   ios-workflow:
-    name: ArcFox OS iOS Build
+    name: iOS Build
     max_build_duration: 60
     environment:
-      ios_signing:
-        distribution_type: ad_hoc
-        bundle_identifier: com.arcfox.os
-      xcode: latest
-      cocoapods: true
-    stages:
-      - name: Checkout
-        script: |
-          cd $CM_BUILD_DIR
-          ls -la
-      - name: Install dependencies
-        script: |
-          cd $CM_BUILD_DIR
-          if [ -f "Podfile" ]; then
-            pod install
-          fi
+      xcode: "15.0"
+      node: "18.0"
+      vars:
+        XCODE_WORKSPACE: ""
+        XCODE_SCHEME: "ArcFoxOS"
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: "*"
+    scripts:
       - name: Generate Xcode project
         script: |
-          cd $CM_BUILD_DIR
-          if [ -f "project.yml" ]; then
-            xcodegen generate || echo "XcodeGen not available"
+          cd $FCI_BUILD_DIR
+          if [ -f project.yml ]; then
+            # Codemagic has xcodegen pre-installed
+            xcodegen generate
           fi
           ls -la
-      - name: Build
+      - name: Build iOS
         script: |
-          cd $CM_BUILD_DIR
-          xcodebuild -project *.xcodeproj -scheme ArcFoxOS -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 16' build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO 2>&1 | tail -30
+          cd $FCI_BUILD_DIR
+          xcodebuild -project ArcFoxOS.xcodeproj -scheme ArcFoxOS -configuration Debug build CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" DEVELOPMENT_TEAM="" 2>&1 | tail -30
     artifacts:
+      - $FCI_BUILD_DIR/**/*.xcarchive
       - build/ios/ipa/*.ipa
-      - build/**/*.xcarchive
-    publishing:
-      email:
-        recipients:
-          - mattypatty918@gmail.com
