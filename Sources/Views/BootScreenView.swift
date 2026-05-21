@@ -1,72 +1,66 @@
 import SwiftUI
 
 struct BootScreenView: View {
-    @State private var opacity: Double = 0.0
-    @State private var scale: CGFloat = 0.7
-    @State private var showProgress: Bool = false
+    @EnvironmentObject var bootManager: BootManager
 
     var body: some View {
         ZStack {
-            Color.black
-                .ignoresSafeArea()
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(hex: "0A0A0F"),
+                    Color(hex: "1A1A2E")
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
 
-            VStack(spacing: 24) {
+            VStack(spacing: 40) {
                 Spacer()
 
-                // ArcFox Logo
-                Image(systemName: "pawprint.fill")
+                // Logo
+                Image(systemName: "aqi.medium")
                     .font(.system(size: 80))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color(hex: "#FF6B35"), Color(hex: "#F7C331")],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .scaleEffect(scale)
-                    .opacity(opacity)
-
-                Text("ArcFox")
-                    .font(.system(size: 44, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
-                    .opacity(opacity)
+                    .shadow(color: Color(hex: "6366F1").opacity(0.5), radius: 30)
 
-                Text("Initializing system...")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .opacity(opacity)
-
-                if showProgress {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white.opacity(0.7)))
-                        .scaleEffect(1.2)
-                        .padding(.top, 20)
-                }
+                Text("ArcFox OS")
+                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
 
                 Spacer()
 
-                Text("ArcFox OS v1.0")
-                    .font(.caption2)
-                    .foregroundColor(.white.opacity(0.2))
-                    .padding(.bottom, 40)
-            }
-        }
-        .onAppear {
-            withAnimation(.easeOut(duration: 1.2)) {
-                opacity = 1.0
-                scale = 1.0
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                withAnimation(.easeIn(duration: 0.4)) {
-                    showProgress = true
-                }
-            }
-        }
-    }
-}
+                // Progress bar
+                VStack(spacing: 12) {
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.white.opacity(0.1))
+                                .frame(height: 4)
 
-struct BootScreenView_Previews: PreviewProvider {
-    static var previews: some View {
-        BootScreenView()
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color(hex: "6366F1"), Color(hex: "8B5CF6")],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .frame(width: geometry.size.width * bootManager.bootProgress, height: 4)
+                        }
+                    }
+                    .frame(width: 200, height: 4)
+
+                    Text("Loading...")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white.opacity(0.6))
+                }
+
+                Spacer()
+            }
+        }
+        .ignoresSafeArea()
+        .onAppear {
+            bootManager.startBoot()
+        }
     }
 }

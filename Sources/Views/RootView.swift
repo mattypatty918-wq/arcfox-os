@@ -5,34 +5,19 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            Color.black
-                .ignoresSafeArea()
-
-            switch bootManager.phase {
+            switch bootManager.deviceState {
             case .off:
                 PowerOffView()
-                    .transition(.opacity)
-
             case .booting:
                 BootScreenView()
-                    .transition(.opacity)
-
-            case .lockscreen:
+            case .locked:
                 LockScreenView()
-                    .transition(.opacity)
-
             case .home:
                 HomeScreenView()
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .bottom),
-                        removal: .move(edge: .top)
-                    ))
-
-            case .crashed:
+            case .crash:
                 CrashScreenView()
-                    .transition(.opacity)
             }
         }
-        .animation(.easeInOut(duration: 0.5), value: bootManager.phase)
+        .animation(.easeInOut(duration: 0.3), value: bootManager.deviceState)
     }
 }

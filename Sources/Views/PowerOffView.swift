@@ -1,36 +1,40 @@
 import SwiftUI
 
 struct PowerOffView: View {
+    @EnvironmentObject var bootManager: BootManager
+
     var body: some View {
         ZStack {
-            Color.black
-                .ignoresSafeArea()
+            Color(hex: "0A0A0F")
+            .ignoresSafeArea()
 
-            VStack(spacing: 24) {
-                Spacer()
+            VStack(spacing: 30) {
+                Image(systemName: "power")
+                    .font(.system(size: 60))
+                    .foregroundColor(.white.opacity(0.3))
 
-                Image(systemName: "power.circle.fill")
-                    .font(.system(size: 90))
-                    .foregroundColor(.white.opacity(0.15))
+                Text("Hold power button to start")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.white.opacity(0.4))
 
-                Text("Device is Off")
-                    .font(.title2)
-                    .fontWeight(.light)
-                    .foregroundColor(.white.opacity(0.25))
-
-                Spacer()
-
-                Text("Press and hold power button to turn on")
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.15))
-                    .padding(.bottom, 60)
+                Button(action: {
+                    bootManager.startBoot()
+                }) {
+                    Text("Power On")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 200, height: 50)
+                        .background(
+                            LinearGradient(
+                                colors: [Color(hex: "6366F1"), Color(hex: "8B5CF6")],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(25)
+                        .shadow(color: Color(hex: "6366F1").opacity(0.4), radius: 15)
+                }
             }
         }
-    }
-}
-
-struct PowerOffView_Previews: PreviewProvider {
-    static var previews: some View {
-        PowerOffView()
     }
 }

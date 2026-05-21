@@ -1,119 +1,129 @@
 import SwiftUI
 
+struct AppItem: Identifiable {
+    let id = UUID()
+    let name: String
+    let icon: String
+    let color: Color
+}
+
 struct HomeScreenView: View {
     @EnvironmentObject var bootManager: BootManager
+    @State private var showDock = true
+    @State private var selectedApp: AppItem?
+    @State private var showApp = false
 
     let apps: [AppItem] = [
-        AppItem(name: "Safari",     icon: "safari.fill",          color: .blue),
-        AppItem(name: "Messages",   icon: "message.fill",         color: .green),
-        AppItem(name: "Photos",      icon: "photo.fill",           color: .yellow),
-        AppItem(name: "Camera",     icon: "camera.fill",          color: .gray),
-        AppItem(name: "Mail",       icon: "envelope.fill",         color: .blue),
-        AppItem(name: "Maps",       icon: "map.fill",             color: .green),
-        AppItem(name: "Music",      icon: "music.note",           color: .pink),
-        AppItem(name: "Settings",   icon: "gearshape.fill",       color: .gray),
-        AppItem(name: "Clock",      icon: "clock.fill",           color: .orange),
-        AppItem(name: "Calendar",   icon: "calendar",             color: .red),
-        AppItem(name: "Notes",      icon: "note.text",            color: .yellow),
-        AppItem(name: "Weather",    icon: "cloud.sun.fill",       color: .cyan),
-        AppItem(name: "FaceTime",   icon: "video.fill",           color: .blue),
-        AppItem(name: "Podcasts",   icon: "waveform",             color: .purple),
-        AppItem(name: "App Store",  icon: "app.fill",             color: .blue),
-        AppItem(name: "Wallet",     icon: "creditcard.fill",      color: .black),
+        AppItem(name: "Safari", icon: "globe", color: Color(hex: "007AFF")),
+        AppItem(name: "Photos", icon: "photo", color: Color(hex: "FF9500")),
+        AppItem(name: "Camera", icon: "camera", color: Color(hex: "8E8E93")),
+        AppItem(name: "Music", icon: "music.note", color: Color(hex: "FA2D48")),
+        AppItem(name: "Mail", icon: "envelope", color: Color(hex: "007AFF")),
+        AppItem(name: "Calendar", icon: "calendar", color: Color(hex: "FF3B30")),
+        AppItem(name: "Notes", icon: "note.text", color: Color(hex: "FFCC00")),
+        AppItem(name: "Maps", icon: "map", color: Color(hex: "34C759")),
+        AppItem(name: "Settings", icon: "gear", color: Color(hex: "8E8E93")),
+        AppItem(name: "Clock", icon: "clock", color: Color(hex: "000000")),
+        AppItem(name: "Weather", icon: "cloud.sun", color: Color(hex: "5AC8FA")),
+        AppItem(name: "Files", icon: "folder", color: Color(hex: "007AFF")),
+        AppItem(name: "App Store", icon: "bag", color: Color(hex: "5AC8FA")),
+        AppItem(name: "FaceTime", icon: "video", color: Color(hex: "32D74B")),
+        AppItem(name: "Messages", icon: "message", color: Color(hex: "34C759"))
     ]
-
-    let columns = Array(repeating: GridItem(.flexible(), spacing: 20), count: 4)
-
-    @State private var currentTime = Date()
-    let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ZStack {
-            // Wallpaper
             LinearGradient(
-                colors: [Color(hex: "#1a1a2e"), Color(hex: "#16213e"), Color(hex: "#0f3460")],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+                gradient: Gradient(colors: [
+                    Color(hex: "1A1A2E"),
+                    Color(hex: "0F0F1A")
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
             )
             .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Status Bar
+                // Status bar
                 HStack {
-                    Text(currentTime, format: .dateTime.hour().minute())
-                        .font(.caption)
-                        .fontWeight(.semibold)
+                    Text("12:30")
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.white)
-                        .onReceive(timer) { _ in
-                            currentTime = Date()
-                        }
-
                     Spacer()
-
                     HStack(spacing: 6) {
                         Image(systemName: "wifi")
-                        Image(systemName: "battery.100")
-                            .symbolRenderingMode(.hierarchical)
+                        Image(systemName: "battery.75")
                     }
-                    .font(.caption)
+                    .font(.system(size: 12))
                     .foregroundColor(.white)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 12)
+                .padding(.top, 8)
 
                 Spacer()
 
-                // App Grid
-                LazyVGrid(columns: columns, spacing: 28) {
+                // App grid
+                LazyVGrid(columns: [
+                    GridItem(.flexible()),
+                    GridItem(.flexible()),
+                    GridItem(.flexible()),
+                    GridItem(.flexible())
+                ], spacing: 30) {
                     ForEach(apps) { app in
                         AppIconView(app: app)
+                            .onTapGesture {
+                                selectedApp = app
+                                showApp = true
+                            }
                     }
                 }
                 .padding(.horizontal, 20)
 
                 Spacer()
 
+                // Page indicator
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 8, height: 8)
+                    Circle()
+                        .fill(Color.white.opacity(0.3))
+                        .frame(width: 8, height: 8)
+                    Circle()
+                        .fill(Color.white.opacity(0.3))
+                        .frame(width: 8, height: 8)
+                }
+                .padding(.bottom, 15)
+
                 // Dock
-                HStack(spacing: 28) {
-                    ForEach(apps.prefix(4)) { app in
-                        AppIconView(app: app, size: 52)
+                if showDock {
+                    HStack(spacing: 25) {
+                        ForEach(["safari", "messages", "photos", "camera", "settings"].indices, id: \.self) { index in
+                            Image(systemName: ["globe", "message", "photo", "camera", "gear"][index])
+                                .font(.system(size: 24))
+                                .foregroundColor(.white)
+                                .frame(width: 50, height: 50)
+                                .background(
+                                    Circle()
+                                        .fill(Color.white.opacity(0.15))
+                                )
+                        }
                     }
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 20)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.white.opacity(0.1))
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-                .padding(.vertical, 14)
-                .padding(.horizontal, 28)
-                .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 28))
-                .padding(.bottom, 16)
 
-                // Bottom bar
-                HStack {
-                    Button(action: { bootManager.lock() }) {
-                        Image(systemName: "lock.fill")
-                            .font(.footnote)
-                            .foregroundColor(.white.opacity(0.6))
-                    }
-
-                    Spacer()
-
-                    Button(action: { bootManager.shutdown() }) {
-                        Label("Power Off", systemImage: "power")
-                            .font(.footnote)
-                            .foregroundColor(.white.opacity(0.6))
-                    }
-                }
-                .padding(.horizontal, 40)
-                .padding(.bottom, 20)
+                Spacer()
+                    .frame(height: 30)
             }
         }
         .onAppear {
-            currentTime = Date()
+            showDock = true
         }
-    }
-}
-
-struct HomeScreenView_Previews: PreviewProvider {
-    static var previews: some View {
-        HomeScreenView()
-            .environmentObject(BootManager())
     }
 }

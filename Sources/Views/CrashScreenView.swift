@@ -5,49 +5,42 @@ struct CrashScreenView: View {
 
     var body: some View {
         ZStack {
-            Color.black
-                .ignoresSafeArea()
+            Color(hex: "0A0A0F")
+            .ignoresSafeArea()
 
-            VStack(spacing: 24) {
-                Spacer()
-
+            VStack(spacing: 30) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 72))
-                    .foregroundColor(.red)
-                    .symbolEffect(.pulse)
+                    .font(.system(size: 60))
+                    .foregroundColor(Color(hex: "FF3B30"))
 
-                Text("System Crashed")
-                    .font(.title)
-                    .fontWeight(.bold)
+                Text("System Crash Detected")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
 
-                Text("ArcFox OS encountered an error")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
+                Text("An unexpected error has occurred.\nPlease restart your device.")
+                    .font(.system(size: 16))
+                    .foregroundColor(.white.opacity(0.6))
+                    .multilineTextAlignment(.center)
 
-                Spacer()
-
-                Button(action: { bootManager.reboot() }) {
-                    HStack {
-                        Image(systemName: "arrow.clockwise")
-                        Text("Reboot System")
-                    }
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 32)
-                    .padding(.vertical, 16)
-                    .background(Color.red.opacity(0.8))
-                    .clipShape(Capsule())
+                Button(action: {
+                    bootManager.startBoot()
+                }) {
+                    Text("Reboot System")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 220, height: 50)
+                        .background(Color(hex: "FF3B30"))
+                        .cornerRadius(25)
                 }
-                .padding(.bottom, 80)
+
+                Button(action: {
+                    bootManager.powerOff()
+                }) {
+                    Text("Power Off")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.white.opacity(0.5))
+                }
             }
         }
-    }
-}
-
-struct CrashScreenView_Previews: PreviewProvider {
-    static var previews: some View {
-        CrashScreenView()
-            .environmentObject(BootManager())
     }
 }
