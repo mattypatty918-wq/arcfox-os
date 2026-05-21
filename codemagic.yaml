@@ -1,41 +1,23 @@
-name: ArcFox OS
-description: Native iOS simulator phone OS UI
-environment:
-  xcode: "16.0"
-  node: "18"
-
+# Codemagic CI/CD for ArcFox OS
 workflows:
-  native-ios:
-    name: Native iOS Build
+  ios-workflow:
+    name: iOS Build
     max_build_duration: 60
-    instance_type: mac_mini_m2
     environment:
-      xcode: "16.0"
-      ios-signing:
-        distribution_type: ad_hoc
-        bundle_identifier: com.arc.ios
-    cache:
-      - "~/.肴" # ~ is /Users/builder
-    stages:
-      - name: Clone & Build
-        scripts:
-          - name: List files
-            command: |
-              ls -la
-              pwd
-              xcrun simctl list devices available | head -20
-          - name: Generate Xcode project
-            command: |
-              which xcodegen || echo "xcodegen not found - will use .xcodeproj"
-              if which xcodegen > /dev/null 2>&1; then
-                xcodegen generate
-              fi
-          - name: Build iOS project
-            command: |
-              xcodebuild -workspace Sources/App/ArcFoxOS.xcodeproj -scheme ArcFoxOS -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 16 Pro' build 2>&1 | tail -50
+      vars:
+        XCODE_VERSION: "16.0"
+        APP_NAME: arcfox-os
+    triggering:
+      branch_patterns:
+        - pattern: master
+          include: true
+    scripts:
+      - git clone https://github.com/mattypatty918-wq/arcfox-os.git --depth 1
+      - cd arcfox-os && git submodule update --init --recursive
+      - cd arcfox-os && xcode-project fetch-dependencies --use-cache
+      - cd arcfox-os && xcode-project build --workspace ArcFoxOS.xcodeproj --scheme ArcFoxOS --configuration Release
     artifacts:
-      - build/Debug-iphonesimulator/*.app
+      - arcfox-os/*.ipa
     publishing:
-      email:
-        recipients:
-          - mattypatty918@gmail.com
+      app_store_connect:
+        api_key: Whitefoxes
